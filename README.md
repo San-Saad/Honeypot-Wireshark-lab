@@ -1,176 +1,164 @@
-# Honeypot-Wireshark-lab
-Honeypot + Wireshark integration lab for capturing, analyzing, and responding to real attack traffic
-# 🛡️ Honeypot + Wireshark Cybersecurity Lab
+# Honeypot + Wireshark Cybersecurity Lab
 
-A hands-on cybersecurity home lab featuring honeypot deployment with live traffic capture and analysis. Built to simulate real-world attack scenarios, capture attacker behavior, and analyze malicious traffic at both the application and network layer.
+A hands-on cybersecurity home lab that combines a Cowrie SSH honeypot with Wireshark packet capture. The goal is to observe attack behavior at both the application layer and network layer, then analyze captured logs with Python.
 
----
+## Project Overview
 
-## 📌 Project Overview
+This lab demonstrates how a honeypot can capture suspicious SSH activity while Wireshark records the related packet traffic. The current implementation uses an isolated VirtualBox host-only network so attacks are simulated safely against a VM owned and controlled by the lab owner.
 
-This lab combines two powerful tools:
+Core capabilities:
 
-- **Cowrie** — an SSH/Telnet honeypot that emulates a vulnerable server, logs every login attempt, credential used, and command executed by an attacker
-- **Wireshark / tshark** — captures raw network packets so every connection, scan, and data transfer is recorded at the packet level
+- Deploy a Cowrie SSH honeypot on Ubuntu Server
+- Capture SSH connection attempts with Wireshark
+- Save packet captures as `.pcap` files
+- Record attacker usernames, passwords, sessions, and commands in Cowrie JSON logs
+- Analyze Cowrie logs with a Python reporting script
 
-Together they give a complete picture of an attack: from the first port scan all the way to commands the attacker runs inside the fake shell.
+## Repository Structure
 
----
-
-## 🗂️ Repository Structure
-
-```
+```text
 Honeypot-Wireshark-lab/
-├── honeypot/
-│   ├── cowrie/          # Cowrie SSH honeypot config and setup
-│   ├── dionaea/         # Dionaea malware honeypot (planned)
-│   └── config/          # Shared honeypot configuration files
-├── capture/
-│   ├── scripts/         # tshark automation scripts for packet capture
-│   ├── pcaps/           # Saved packet capture files (.pcap)
-│   └── filters/         # Wireshark display and capture filter profiles
-├── analysis/
-│   ├── logs/            # Normalized Cowrie JSON logs
-│   ├── alerts/          # Alerting scripts (Slack/email notifications)
-│   └── reports/         # Python analysis scripts and findings reports
-├── infra/
-│   └── Dockerfile       # Container setup for isolated deployment
-├── docs/
-│   ├── setup.md         # Full step-by-step setup guide
-│   └── architecture.md  # Lab architecture and design decisions
-├── tests/               # Scripts to simulate attack traffic and verify capture
-├── .env.example         # Environment variable template (no real credentials)
-├── docker-compose.yml   # Spin up the full lab environment
-└── requirements.txt     # Python dependencies for analysis scripts
+|-- analysis/
+|   |-- logs/            # Sanitized Cowrie JSON logs for analysis
+|   |-- alerts/          # Future alerting scripts
+|   `-- reports/         # Python analysis scripts
+|-- assets/
+|   `-- screenshots/     # Lab setup and evidence screenshots
+|-- capture/
+|   |-- filters/         # Wireshark display filters
+|   |-- pcaps/           # Saved demo packet captures
+|   `-- scripts/         # Future tshark automation scripts
+|-- docs/
+|   |-- architecture.md
+|   `-- setup.md
+|-- honeypot/
+|   |-- config/
+|   |-- cowrie/
+|   `-- dionaea/
+|-- infra/
+|-- tests/
+|-- .env.example
+|-- .gitignore
+`-- README.md
 ```
 
----
-
-## 🧰 Tools & Technologies
+## Tools Used
 
 | Tool | Purpose |
-|------|---------|
-| **Cowrie** | SSH/Telnet honeypot — logs credentials and attacker commands |
-| **Wireshark / tshark** | Packet capture and network traffic analysis |
-| **Python** | Log parsing, IP correlation, and attack analysis scripts |
-| **VirtualBox** | Isolated VM environment for safe honeypot deployment |
-| **Ubuntu Server 22.04** | Honeypot host operating system |
-| **Docker** | Containerized deployment (in progress) |
-| **iptables** | Port redirection (port 22 → 2222) |
+| --- | --- |
+| Cowrie | SSH/Telnet honeypot for logging credentials, sessions, and attacker commands |
+| Wireshark | Packet capture and network traffic inspection |
+| Python | Log parsing and analysis |
+| VirtualBox | Isolated lab VM environment |
+| Ubuntu Server | Honeypot host operating system |
+| iptables | Port redirection from SSH port 22 to Cowrie port 2222 |
 
----
+## Lab Architecture
 
-## 🏗️ Architecture
+```text
+Windows host
+  |
+  | SSH test traffic
+  v
+VirtualBox host-only network
+  |
+  | tcp/2222
+  v
+Ubuntu honeypot VM
+  |
+  | Cowrie JSON logs
+  v
+Python analysis script
 
-```
-[ Attacker ]
-     |
-     | SSH / Telnet connection attempt
-     ▼
-[ iptables ] → redirects port 22 → port 2222
-     |
-     ▼
-[ Cowrie Honeypot ] ←─────────────────────────────┐
-  - Emulates real SSH server                       │
-  - Logs: credentials, commands, file downloads    │
-  - Outputs structured JSON logs                   │
-     |                                             │
-     ▼                                             │
-[ Cowrie JSON Logs ]                               │
-     |                                             │
-     ▼                                        [ Python ]
-[ Wireshark / tshark ] ──────────────────→  Correlation
-  - Captures raw packets on network interface      │
-  - Saves to .pcap files                          │
-  - Filters: SYN scans, brute force, DNS, exfil   │
-     |                                             │
-     ▼                                             │
-[ .pcap Files ] ──────────────────────────────────┘
-     |
-     ▼
-[ Analysis Reports ]
-  - Top attacking IPs
-  - Credential lists tried
-  - Commands executed post-auth
-  - Attack timeline
+Wireshark runs on the Windows host and captures the network traffic between
+the host machine and the honeypot VM.
 ```
 
----
+## Current Evidence
 
-## 🚀 Setup
+Setup screenshots:
 
-Full setup guide is in [`docs/setup.md`](docs/setup.md). High level steps:
+- [01 - Cowrie virtual environment active](assets/screenshots/01-cowrie-env-active.png)
+- [02 - Cowrie service started](assets/screenshots/02-cowrie-start.png)
+- [03 - Cowrie listening on port 2222](assets/screenshots/03-cowrie-listening-2222.png)
+- [04 - iptables redirect configured](assets/screenshots/04-iptables-redirect.png)
+- [05 - Wireshark interface selected](assets/screenshots/05-wireshark-interfaces.png)
+- [06 - Wireshark capturing SSH traffic](assets/screenshots/06-wireshark-capturing.png)
+- [07 - Cowrie JSON logs showing attack activity](assets/screenshots/07-cowrie-json-logs.png)
+- [08 - Wireshark SYN filter applied](assets/screenshots/08-wireshark-syn-filter.png)
 
-1. Create an isolated VM in VirtualBox (Ubuntu Server 22.04)
-2. Install and configure Cowrie on the VM
-3. Redirect port 22 → 2222 via iptables
-4. Run Wireshark/tshark on the host machine capturing the VM's interface
-5. Simulate attacks from a second VM to verify capture
-6. Run the Python analysis script to correlate logs and packets
+Packet capture:
 
----
+- [Demo honeypot packet capture](capture/pcaps/honeypot-capture-demo.pcapng)
 
-## 📊 Sample Findings
+Wireshark filters:
 
-> *(Screenshots and findings will be added as the lab runs)*
+- [Display filters used in the lab](capture/filters/wireshark-display-filters.txt)
 
-- **Cowrie logs** — attacker IPs, passwords attempted, shell commands run
-- **Wireshark captures** — TCP handshakes, SYN scan patterns, brute force timing
-- **Python output** — top attacking IPs ranked by attempt count, credential analysis
+## Python Log Analysis
 
----
+The analyzer is located at:
 
-## 📸 Screenshots
+```text
+analysis/reports/analyze_logs.py
+```
 
-> *(To be added)*
+Expected input:
 
-- [ ] Cowrie running and listening on port 2222
-- [ ] Wireshark capturing live traffic
-- [ ] SSH brute force attack hitting the honeypot
-- [ ] Cowrie JSON log showing attacker commands
-- [ ] Python analysis script output
+```text
+analysis/logs/cowrie.json
+```
 
----
+Run from the repository root:
 
-## 🔐 Security Notes
+```powershell
+py analysis\reports\analyze_logs.py analysis\logs\cowrie.json
+```
 
-- This lab runs in a fully isolated VirtualBox host-only network
-- No real credentials, keys, or sensitive data are stored in this repo
-- `.pcap` files containing real attack traffic are excluded via `.gitignore`
-- `.env` files with real values are excluded — use `.env.example` as a template
+The script summarizes:
 
----
+- Top source IP addresses
+- Usernames attempted
+- Passwords attempted
+- Credential pairs
+- Successful and failed honeypot logins
+- Commands entered after login
+- Event type counts
+- Command timeline by session
 
-## 📚 What I Learned
+## Key Findings So Far
 
-- How honeypots work at the application layer and why attackers can't tell they're fake
-- How to correlate application-layer logs (Cowrie JSON) with network-layer packet captures (Wireshark)
-- How to identify attack tool fingerprints — Nmap vs Masscan produce different TCP SYN patterns
-- How brute force attacks look at the packet level vs the log level
-- Practical use of `tshark` filters, `iptables` NAT rules, and Python log parsing
+- Cowrie was successfully deployed and listened on TCP port 2222.
+- The Windows host reached the honeypot through the VirtualBox host-only network.
+- Wireshark captured the SSH handshake and traffic to the honeypot.
+- Cowrie recorded failed login attempts, a successful honeypot login, and commands entered in the fake shell.
 
----
+## Roadmap
 
-## 🗺️ Roadmap
+- [x] Create GitHub repository and project structure
+- [x] Deploy Ubuntu Server VM
+- [x] Install and start Cowrie
+- [x] Configure port redirection
+- [x] Capture SSH traffic in Wireshark
+- [x] Save demo `.pcap` file
+- [x] Add Wireshark display filters
+- [x] Add Python Cowrie log analyzer
+- [ ] Add sanitized Cowrie JSON sample
+- [ ] Run analyzer against real lab logs
+- [ ] Add screenshot of Python analysis output
+- [ ] Expand `docs/setup.md`
+- [ ] Add architecture documentation
+- [ ] Add automated tshark capture script
+- [ ] Add alerting pipeline
 
-- [x] Ubuntu Server VM setup
-- [x] Cowrie honeypot installed and configured
-- [x] GitHub repo and folder structure
-- [ ] Port redirect and Wireshark capture running
-- [ ] First simulated attack captured end-to-end
-- [ ] Python correlation script complete
-- [ ] Dionaea malware honeypot added
-- [ ] Docker Compose deployment
-- [ ] Alerting pipeline (Slack webhook on attack detection)
-- [ ] ELK stack / Grafana dashboard for log visualization
+## Security Notes
 
----
+- This project is for education and portfolio demonstration only.
+- All attack simulations are performed in an isolated lab environment on systems owned by the lab owner.
+- Do not commit real credentials, private keys, public attacker IPs, or sensitive network information.
+- Real-world packet captures can contain sensitive data. Only sanitized demo captures should be committed.
 
-## 👤 Author
+## Author
 
-**San Saad**  
-[GitHub](https://github.com/San-Saad) 
-
----
-
-> ⚠️ This project is for educational purposes only. All attack simulations are performed in an isolated lab environment on systems I own.
+San Saad  
+[GitHub](https://github.com/San-Saad)

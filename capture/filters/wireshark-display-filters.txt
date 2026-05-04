@@ -1,0 +1,10 @@
+# Wireshark display filters used in this lab
+
+# Show SSH honeypot traffic on Cowrie's listening port.
+tcp.port == 2222
+
+# Show initial TCP SYN packets without ACK.
+tcp.flags.syn == 1 && tcp.flags.ack == 0
+
+# Show traffic between the Windows host and the honeypot VM.
+ip.addr == 192.168.56.1 && ip.addr == 192.168.56.101
