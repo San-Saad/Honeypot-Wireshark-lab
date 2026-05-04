@@ -116,7 +116,9 @@ Screenshot:
 
 Packet capture:
 
-[capture/pcaps/honeypot-capture-demo.pcapng](capture/pcaps/honeypot-capture-demo.pcapng)
+[Download demo PCAPNG capture](https://raw.githubusercontent.com/San-Saad/Honeypot-Wireshark-lab/main/capture/pcaps/honeypot-capture-demo.pcapng)
+
+Note: `.pcapng` files are binary packet capture files. GitHub does not render them like text or images. Download the file and open it in Wireshark to inspect the captured traffic.
 
 ---
 
