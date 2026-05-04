@@ -86,6 +86,7 @@ Setup screenshots:
 - [06 - Wireshark capturing SSH traffic](assets/screenshots/06-wireshark-capturing.png)
 - [07 - Cowrie JSON logs showing attack activity](assets/screenshots/07-cowrie-json-logs.png)
 - [08 - Wireshark SYN filter applied](assets/screenshots/08-wireshark-syn-filter.png)
+- [09 - Python analysis output](assets/screenshots/09-python-analysis-output.png)
 
 Packet capture:
 
@@ -143,9 +144,9 @@ The script summarizes:
 - [x] Save demo `.pcap` file
 - [x] Add Wireshark display filters
 - [x] Add Python Cowrie log analyzer
-- [ ] Add sanitized Cowrie JSON sample
-- [ ] Run analyzer against real lab logs
-- [ ] Add screenshot of Python analysis output
+- [x] Add sanitized Cowrie JSON sample
+- [x] Run analyzer against real lab logs
+- [x] Add screenshot of Python analysis output
 - [ ] Expand `docs/setup.md`
 - [ ] Add architecture documentation
 - [ ] Add automated tshark capture script
